@@ -1,7 +1,17 @@
 const express    = require('express');
 const passport   = require('passport');
 const router     = express.Router();
+const User = require('../models/user');
 const { ensureLoggedIn, ensureLoggedOut } = require('connect-ensure-login');
+
+
+
+
+const multer = require('multer');
+const upload = multer({dest: './public/assets'});
+
+
+
 
 router.get('/login', ensureLoggedOut(), (req, res) => {
     res.render('authentication/login', { message: req.flash('error')});
@@ -17,11 +27,26 @@ router.get('/signup', ensureLoggedOut(), (req, res) => {
     res.render('authentication/signup', { message: req.flash('error')});
 });
 
-router.post('/signup', ensureLoggedOut(), passport.authenticate('local-signup', {
-  successRedirect : '/',
-  failureRedirect : '/signup',
-  failureFlash : true
-}));
+router.post('/signup', ensureLoggedOut(),upload.single('photo'),(req,res,next)=>{
+    //req.body.photoURL = '/assets/' + req.file.filename
+    console.log(req)
+    //User.register(req.body, req.body.password)
+    .then(user=>{
+        Console.log(user);
+        res.redirect('/login')
+    })
+    .catch(e=>next(e));
+});
+
+
+
+/*
+router.post('/signup', ensureLoggedOut(),
+passport.authenticate('local-signup', {
+    successRedirect : '/',
+    failureRedirect : '/signup',
+    failureFlash : true
+}));*/
 
 router.get('/profile', ensureLoggedIn('/login'), (req, res) => {
     res.render('authentication/profile', {
